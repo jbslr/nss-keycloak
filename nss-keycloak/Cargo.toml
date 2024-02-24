@@ -1,5 +1,5 @@
 [package]
-name = "nss-keycloak"
+name = "nss_keycloak"
 version = "0.1.0"
 edition = "2021"
 
@@ -7,7 +7,7 @@ edition = "2021"
 
 [lib]
 name = "nss_keycloak"
-crate-type = [ "cdylib" ]
+crate-type = [ "cdylib", "rlib" ]
 
 [dependencies]
 anyhow = "1.0.80"
