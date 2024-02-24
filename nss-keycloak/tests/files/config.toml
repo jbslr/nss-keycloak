@@ -1,10 +1,10 @@
 [keycloak]
-realm = "myrealm"
-url = "http://localhost:8080/auth"
-client_id = "myclient"
-client_secret = "mysecret"
-username = "myuser"
-password = "mypassword"
+realm = "test"
+url = "http://localhost:8080"
+client_id = "nss-client"
+client_secret = "UO2i2h5Vku3oQBvFIlsMG23pIMZyRJOi"
+username = "nss-user"
+password = "nss-user"
 
 [mapping]
 user_home = "homedirectory"
