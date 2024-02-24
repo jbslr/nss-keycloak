@@ -1,0 +1,1 @@
+FROM docker.io/keycloak/keycloak:23.0
