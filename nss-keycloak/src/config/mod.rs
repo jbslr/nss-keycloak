@@ -2,6 +2,7 @@ mod model;
 
 use anyhow::Result;
 
+#[allow(unused_imports)]
 pub use model::{Config, KeycloakConfig, MappingConfig};
 
 pub const CONFIG_ENV: &str = "NSSKEYCLOAK_CONFIG_FILE";
