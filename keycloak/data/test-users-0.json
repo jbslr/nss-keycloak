@@ -1,0 +1,100 @@
+{
+  "realm" : "test",
+  "users" : [ {
+    "id" : "e504f431-69f4-49e0-907f-cb1f361917b9",
+    "createdTimestamp" : 1708736632361,
+    "username" : "nss-user",
+    "enabled" : true,
+    "totp" : false,
+    "emailVerified" : false,
+    "credentials" : [ {
+      "id" : "d3eac237-5e7f-4e97-8a9e-3b8afff7ffa5",
+      "type" : "password",
+      "userLabel" : "My password",
+      "createdDate" : 1708736653599,
+      "secretData" : "{\"value\":\"o5mklf8sIN4Er5tBxtQVaUufjayrgGa6Kn13FfROtf4=\",\"salt\":\"M9Ugn9pj4NDtDHda7/YYKQ==\",\"additionalParameters\":{}}",
+      "credentialData" : "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
+    } ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "default-roles-test" ],
+    "clientRoles" : {
+      "realm-management" : [ "query-users", "query-groups", "view-users" ]
+    },
+    "notBefore" : 0,
+    "groups" : [ ]
+  }, {
+    "id" : "c44ad396-3431-408c-a8dc-64a964ef6eec",
+    "createdTimestamp" : 1708736549601,
+    "username" : "service-account-nss-client",
+    "enabled" : true,
+    "totp" : false,
+    "emailVerified" : false,
+    "serviceAccountClientId" : "nss-client",
+    "credentials" : [ ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "default-roles-test" ],
+    "clientRoles" : {
+      "nss-client" : [ "uma_protection" ]
+    },
+    "notBefore" : 0,
+    "groups" : [ ]
+  }, {
+    "id" : "ab1e3aaf-ea15-4790-9659-580754eb7daf",
+    "createdTimestamp" : 1708736757370,
+    "username" : "user01",
+    "enabled" : true,
+    "totp" : false,
+    "emailVerified" : false,
+    "firstName" : "user",
+    "lastName" : "oh-one",
+    "attributes" : {
+      "uidnumber" : [ "1000" ],
+      "homedirectory" : [ "/home/user01" ],
+      "loginshell" : [ "/bin/bash" ],
+      "gidnumber" : [ "500" ]
+    },
+    "credentials" : [ {
+      "id" : "23198d10-0a3e-4cb1-be32-d73ba00c8bc6",
+      "type" : "password",
+      "userLabel" : "My password",
+      "createdDate" : 1708736767287,
+      "secretData" : "{\"value\":\"sI5B2JxPqDQvp9WIAhqOYcN9FU5MYhGQzt34vbORD8k=\",\"salt\":\"rNuwa+HnF+VrQZwKNEBmrA==\",\"additionalParameters\":{}}",
+      "credentialData" : "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
+    } ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "default-roles-test" ],
+    "notBefore" : 0,
+    "groups" : [ "/group01" ]
+  }, {
+    "id" : "e46f6aac-7bbf-4726-9266-dab8d268bac1",
+    "createdTimestamp" : 1708736910878,
+    "username" : "user02",
+    "enabled" : true,
+    "totp" : false,
+    "emailVerified" : false,
+    "firstName" : "user",
+    "lastName" : "oh-two",
+    "attributes" : {
+      "uidnumber" : [ "1001" ],
+      "homedirectory" : [ "/home/user02" ],
+      "loginshell" : [ "/bin/bash" ],
+      "gidnumber" : [ "501" ]
+    },
+    "credentials" : [ {
+      "id" : "39b05806-b654-4e78-928e-cff2aee0b886",
+      "type" : "password",
+      "userLabel" : "My password",
+      "createdDate" : 1708736920855,
+      "secretData" : "{\"value\":\"Sur4dkDI5Q18Byr9aROkD4ESo9r+jouYpbTnFxDiGiA=\",\"salt\":\"udVDAvqVv3ztWGpsF7kJwA==\",\"additionalParameters\":{}}",
+      "credentialData" : "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
+    } ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "default-roles-test" ],
+    "notBefore" : 0,
+    "groups" : [ "/group02" ]
+  } ]
+}
