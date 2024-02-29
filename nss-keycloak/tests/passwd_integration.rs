@@ -28,3 +28,34 @@ fn test_password_get_all_entries() {
         }
     });
 }
+
+#[test]
+fn test_get_user_by_name_found() {
+    temp_env::with_var("NSSKEYCLOAK_CONFIG_FILE", Some("tests/files/config.toml"), || {
+        let username = "user01".to_string();
+        let response = nss_keycloak::KeycloakNssPasswd::get_entry_by_name(username);
+        match response {
+            Response::Success(passwd) => {
+                assert_eq!(passwd.name, "user01");
+                assert_eq!(passwd.uid, 1000);
+                assert_eq!(passwd.gid, 500);
+                assert_eq!(passwd.dir, "/home/user01");
+                assert_eq!(passwd.gecos, ",,,");
+                assert_eq!(passwd.shell, "/bin/bash");
+            },
+            _ => panic!("Failed to get user by name"),
+        }
+    });
+}
+
+#[test]
+fn test_get_user_by_name_not_found() {
+    temp_env::with_var("NSSKEYCLOAK_CONFIG_FILE", Some("tests/files/config.toml"), || {
+        let username = "does_not_exist".to_string(); // username does not exist
+        let response = nss_keycloak::KeycloakNssPasswd::get_entry_by_name(username);
+        match response {
+            Response::NotFound => (), // expected
+            _ => panic!("Expected NotFound, got something else"),
+        }
+    });
+}
