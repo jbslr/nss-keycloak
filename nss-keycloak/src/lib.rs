@@ -1,9 +1,12 @@
 pub mod config;
 pub mod keycloak;
+mod passwd;
 
 use std::sync::Mutex;
 
 use lazy_static::lazy_static;
+
+pub use passwd::KeycloakNssPasswd;
 
 lazy_static! {
     // TODO: Remove pub visibility once the plugin is implemented
