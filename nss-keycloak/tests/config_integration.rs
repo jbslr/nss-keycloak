@@ -15,7 +15,7 @@ fn test_get_config_path_from_env() {
         assert_eq!(CONFIG.keycloak.password, "nss-user");
         // config.mapping
         assert_eq!(CONFIG.mapping.user_home, "homedirectory");
-        assert_eq!(CONFIG.mapping.user_shell, "defaultshell");
+        assert_eq!(CONFIG.mapping.user_shell, "loginshell");
         assert_eq!(CONFIG.mapping.user_gecos, "gecos");
         assert_eq!(CONFIG.mapping.user_uid, "uidnumber");
         assert_eq!(CONFIG.mapping.user_gid, "gidnumber");

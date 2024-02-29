@@ -8,7 +8,7 @@ password = "nss-user"
 
 [mapping]
 user_home = "homedirectory"
-user_shell = "defaultshell"
+user_shell = "loginshell"
 user_gecos = "gecos"
 user_uid = "uidnumber"
 user_gid = "gidnumber"
