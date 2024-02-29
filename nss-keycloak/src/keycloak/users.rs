@@ -178,3 +178,32 @@ pub fn list_users(
     }
     Ok(users)
 }
+
+/// Get a user by its username
+/// Returns a KeycloakUser instance if the user is found
+/// Returns None if the user is not found
+/// Returns an error if multiple users with that name are found or any 
+/// other error occurs during the request
+pub fn get_user_by_name(
+    config: &KeycloakConfig, 
+    attribute_mapping: &MappingConfig, 
+    access_token: &str, 
+    username: &str,
+) -> Result<Option<KeycloakUser>> {
+    let client = Client::new();
+    let mut users = users_request(
+        config, 
+        attribute_mapping,
+        access_token, 
+        &[
+            ("username", username),
+            ("exact", "true"),
+            ],
+        &client,
+    )?;
+    if users.len() <= 1 {
+        Ok(users.pop())
+    } else {
+        Err(anyhow!("Found more than one user with the name {}", username))
+    }
+}
