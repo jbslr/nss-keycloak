@@ -1,6 +1,7 @@
 pub mod config;
 pub mod keycloak;
 mod passwd;
+mod group;
 
 use std::sync::Mutex;
 
