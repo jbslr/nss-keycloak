@@ -207,3 +207,32 @@ pub fn get_user_by_name(
         Err(anyhow!("Found more than one user with the name {}", username))
     }
 }
+
+/// Get a user by its uid
+/// Returns a KeycloakUser instance if the user is found
+/// Returns None if the user is not found
+/// Returns an error if multiple users with that uid are found or any
+pub fn get_user_by_uid(
+    config: &KeycloakConfig,
+    attribute_mapping: &MappingConfig,
+    access_token: &str,
+    uid: libc::uid_t,
+) -> Result<Option<KeycloakUser>> {
+    let client = Client::new();
+    let mut users = users_request(
+        config,
+        attribute_mapping,
+        access_token,
+        &[
+            ("briefRepresentation", "false"),
+            ("q", &format!("{}:{}", attribute_mapping.user_uid, uid)),
+            ("exact", "true"),
+        ],
+        &client,
+    )?;
+    if users.len() <= 1 {
+        Ok(users.pop())
+    } else {
+        Err(anyhow!("Found more than one user with the uid {}", uid))
+    }
+}
