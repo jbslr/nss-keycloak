@@ -1,11 +1,11 @@
-use std::ops::{Add, DerefMut};
+use std::ops::Add;
 use std::time::Duration;
 
 use anyhow::Result;
-
 use mock_instant::MockClock;
+
 use nss_keycloak::{AUTH, CONFIG};
-use nss_keycloak::keycloak::auth::{KeycloakAuth, TokenProvider};
+use nss_keycloak::keycloak::auth::TokenProvider;
 use nss_keycloak::config::KeycloakConfig;
 
 /// validate token using the Keycloak token introspection endpoint
