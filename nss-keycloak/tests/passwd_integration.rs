@@ -1,6 +1,15 @@
 use libnss::passwd::PasswdHooks;
 use libnss::interop::Response;
 
+fn response_type_as_str<T>(response: &Response<T>) -> &str {
+    match response {
+        Response::Success(_) => "Success",
+        Response::NotFound => "NotFound",
+        Response::Unavail => "Unavail",
+        Response::TryAgain => "TryAgain",
+        Response::Return => "Return",
+    }
+}
 
 #[test]
 fn test_password_get_all_entries() {
@@ -24,7 +33,10 @@ fn test_password_get_all_entries() {
                 assert_eq!(passwds[1].gecos, ",,,");
                 assert_eq!(passwds[1].shell, "/bin/bash");
             },
-            _ => panic!("Failed to get all entries"),
+            _ => panic!(
+                "Failed to get all passwds. Expected Respose::Success, got {}", 
+                response_type_as_str(&response),
+            ),
         }
     });
 }
@@ -43,7 +55,10 @@ fn test_get_user_by_name_found() {
                 assert_eq!(passwd.gecos, ",,,");
                 assert_eq!(passwd.shell, "/bin/bash");
             },
-            _ => panic!("Failed to get user by name"),
+            _ => panic!(
+                "Failed to get user by name. Expected Respose::Success, got {}", 
+                response_type_as_str(&response),
+            ),
         }
     });
 }
@@ -55,7 +70,44 @@ fn test_get_user_by_name_not_found() {
         let response = nss_keycloak::KeycloakNssPasswd::get_entry_by_name(username);
         match response {
             Response::NotFound => (), // expected
-            _ => panic!("Expected NotFound, got something else"),
+            _ => panic!(
+                "Failed to get user by name. Expected Respose::NotFound, got {}", 
+                response_type_as_str(&response),
+            ),
+        }
+    });
+}
+
+#[test]
+fn test_get_user_by_uid_found() {
+    temp_env::with_var("NSSKEYCLOAK_CONFIG_FILE", Some("tests/files/config.toml"), || {
+        let uid = 1000;
+        let response = nss_keycloak::KeycloakNssPasswd::get_entry_by_uid(uid);
+        match response {
+            Response::Success(passwd) => {
+                assert_eq!(passwd.name, "user01");
+                assert_eq!(passwd.uid, 1000);
+                assert_eq!(passwd.gid, 500);
+                assert_eq!(passwd.dir, "/home/user01");
+                assert_eq!(passwd.gecos, ",,,");
+                assert_eq!(passwd.shell, "/bin/bash");
+            },
+            _ => panic!(
+                "Failed to get user by uid. Expected Respose::Success, got {}", 
+                response_type_as_str(&response),
+            ),
+        }
+    });
+}
+
+#[test]
+fn test_get_user_by_uid_not_found() {
+    temp_env::with_var("NSSKEYCLOAK_CONFIG_FILE", Some("tests/files/config.toml"), || {
+        let uid = 9999; // uid does not exist
+        let response = nss_keycloak::KeycloakNssPasswd::get_entry_by_uid(uid);
+        match response {
+            Response::NotFound => (), // expected
+            _ => panic!("Failed to get user by uid. Expected Respose::NotFound, got {}", response_type_as_str(&response)),
         }
     });
 }

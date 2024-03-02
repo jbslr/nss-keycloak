@@ -1,7 +1,8 @@
 use libnss::passwd::{PasswdHooks, Passwd};
 use libnss::interop::Response;
 
-use crate::keycloak::{auth::TokenProvider, users::{list_users, get_user_by_name, KeycloakUser}};
+use crate::keycloak::auth::TokenProvider;
+use crate::keycloak::users::{list_users, get_user_by_name, get_user_by_uid, KeycloakUser};
 
 pub struct KeycloakNssPasswd;
 
@@ -35,7 +36,19 @@ impl PasswdHooks for KeycloakNssPasswd {
     }
 
     fn get_entry_by_uid(uid: libc::uid_t) -> libnss::interop::Response<Passwd> {
-        todo!()
+        match get_user_by_uid(
+            &crate::CONFIG.keycloak, 
+            &crate::CONFIG.mapping,
+            crate::AUTH.lock().unwrap().get_access_token().unwrap(), 
+            uid,
+        ) {
+            Ok(Some(user)) => Response::Success(Passwd::from(user)),
+            Ok(None) => Response::NotFound,
+            Err(err) => {
+                log::error!("Failed to get user by uid: {:?}", err);
+                Response::Unavail
+            },
+        }
     }
 
     fn get_entry_by_name(name: String) -> libnss::interop::Response<Passwd> {
