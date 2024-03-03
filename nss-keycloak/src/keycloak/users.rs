@@ -1,10 +1,10 @@
 use std::collections::BTreeMap;
 
-use serde::Deserialize;
 use reqwest::blocking::Client;
 use anyhow::{anyhow, Ok, Result};
 
 use crate::config::{KeycloakConfig, MappingConfig};
+use super::model::KeycloakUserResponse;
 
 /// batch size for the Keycloak user list API
 const BATCH_SIZE : usize = 100;
@@ -18,13 +18,6 @@ pub struct KeycloakUser {
     pub homedir: String,
     pub loginshell: String,
     pub gecos: String,
-}
-
-#[derive(Deserialize)]
-struct KeycloakUserResponse {
-    username: String,
-    enabled: bool,
-    attributes: Option<BTreeMap<String, Vec<String>>>,
 }
 
 struct MappedKeycloakUserResponse<'a> {
