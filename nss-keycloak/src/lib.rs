@@ -8,6 +8,7 @@ use std::sync::Mutex;
 use lazy_static::lazy_static;
 
 pub use passwd::KeycloakNssPasswd;
+pub use group::KeycloakNssGroup;
 
 lazy_static! {
     // TODO: Remove pub visibility once the plugin is implemented
