@@ -63,30 +63,35 @@ fn groups_request(
     access_token: &str,
     params: &[(&str, &str)],
     client: &Client,
-) -> Result<Vec<KeycloakGroup>> {
+) -> Result<Vec<KeycloakGroupResponse>> {
     let url = get_groups_url(keycloak_config);
     let mut response = client
         .get(url)
         .query(params)
         .bearer_auth(access_token)
         .send()?;
-    let groups = serde_json::from_str::<Vec<KeycloakGroupResponse>>(&response.text()?)?;
     Ok(
-        groups
-        .into_iter()
-        .map(|group| -> Result<KeycloakGroup>{
-            let members = group_member_request(keycloak_config, client, access_token, &group.id);
-            Ok(KeycloakGroup {
-                name: group.name,
-                gid: get_single_attribute(&group.attributes, &attribute_mapping.group_gid)?
-                    .ok_or(anyhow!("Missing required attribute {}", attribute_mapping.group_gid))?
-                    .parse()?,
-                members: members?,
-            })
-        })
-        .filter_map(|r| { println!("{:?}", r); r.ok() })
-        .collect()
+        serde_json::from_str::<Vec<KeycloakGroupResponse>>(
+            &response.text()?
+        )?
     )
+}
+
+fn add_group_members(
+    config: &KeycloakConfig,
+    client: &Client,
+    access_token: &str,
+    attribute_mapping: &MappingConfig,
+    group: KeycloakGroupResponse,
+) -> Result<KeycloakGroup> {
+    let members = group_member_request(config, &client, access_token, &group.id);
+    Ok(KeycloakGroup {
+        name: group.name,
+        gid: get_single_attribute(&group.attributes, &attribute_mapping.group_gid)?
+            .ok_or(anyhow!("Missing required attribute {}", attribute_mapping.group_gid))?
+            .parse()?,
+        members: members?,
+    })
 }
 
 /// List all groups from Keycloak.
@@ -97,14 +102,18 @@ pub(crate) fn list_groups(
 ) -> Result<Vec<KeycloakGroup>>{
     let client = Client::new();
     Ok(
-        groups_request(
-            config,
-            attribute_mapping,
-            access_token,
-            &[
-                ("briefRepresentation", "false"),
-            ],
-            &client,
-        )?
+    groups_request(
+        config,
+        attribute_mapping,
+        access_token,
+        &[
+            ("briefRepresentation", "false"),
+        ],
+        &client,
+    )?
+    .into_iter()
+    .map(|group| add_group_members(config, &client, access_token, attribute_mapping, group))
+    .filter_map(|g| g.ok())
+    .collect()
     )
 }
