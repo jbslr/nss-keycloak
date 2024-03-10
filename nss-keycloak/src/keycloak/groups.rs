@@ -117,3 +117,28 @@ pub(crate) fn list_groups(
     .collect()
     )
 }
+
+pub(crate) fn get_group_by_name(
+    config: &KeycloakConfig, 
+    attribute_mapping: &MappingConfig, 
+    access_token: &str,
+    name: &str,
+) -> Result<Option<KeycloakGroup>> {
+    let client = Client::new();
+    Ok(
+        groups_request(
+            config,
+            attribute_mapping,
+            access_token,
+            &[
+                ("search", name),
+                ("briefRepresentation", "false"),
+            ],
+            &client,
+        )?
+        .into_iter()
+        .map(|group| add_group_members(config, &client, access_token, attribute_mapping, group))
+        .filter_map(|g| g.ok())
+        .next()
+    )
+}
