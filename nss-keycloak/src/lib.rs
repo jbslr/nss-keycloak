@@ -5,7 +5,11 @@ mod passwd;
 
 use std::sync::Mutex;
 
-use lazy_static::lazy_static;
+#[macro_use]
+extern crate lazy_static;
+
+#[macro_use]
+extern crate libnss;
 
 pub use group::KeycloakNssGroup;
 pub use passwd::KeycloakNssPasswd;
@@ -21,3 +25,6 @@ lazy_static! {
                 .expect("Failed to initialize Keycloak authentication")
             );
 }
+
+libnss_group_hooks!(keycloak, KeycloakNssGroup);
+libnss_passwd_hooks!(keycloak, KeycloakNssPasswd);
