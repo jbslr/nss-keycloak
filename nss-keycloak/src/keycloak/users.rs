@@ -1,13 +1,13 @@
 use std::collections::BTreeMap;
 
-use reqwest::blocking::Client;
 use anyhow::{anyhow, Ok, Result};
+use reqwest::blocking::Client;
 
-use crate::config::{KeycloakConfig, MappingConfig};
 use super::model::KeycloakUserResponse;
+use crate::config::{KeycloakConfig, MappingConfig};
 
 /// batch size for the Keycloak user list API
-const BATCH_SIZE : usize = 100;
+const BATCH_SIZE: usize = 100;
 
 /// Data struct for a Keycloak user
 #[derive(Debug)]
@@ -28,25 +28,28 @@ struct MappedKeycloakUserResponse<'a> {
 /// Get a single attribute from a Keycloak user response.
 /// Return none if no such attribute is available
 /// Return an error if multiple values are found
-fn get_single_attribute<'a>(attributes: &'a Option<BTreeMap<String, Vec<String>>>, attr_name: &str) -> Result<Option<&'a String>> {
+fn get_single_attribute<'a>(
+    attributes: &'a Option<BTreeMap<String, Vec<String>>>,
+    attr_name: &str,
+) -> Result<Option<&'a String>> {
     match attributes {
         None => Ok(None),
         Some(ref attributes) => match attributes.get(attr_name) {
             Some(values) if values.len() == 1 => Ok(values.first()),
             Some(values) if values.len() > 1 => Err(anyhow!("multiple {} found", attr_name)),
             _ => Ok(None),
-        }
+        },
     }
 }
 
 /// MappedKeycloakUserResponse is a wrapper around KeycloakUserResponse that provides
 /// methods to access user attributes according to the mapping configuration
 impl MappedKeycloakUserResponse<'_> {
-    fn new<'a>(response: &'a KeycloakUserResponse, mapping: &'a MappingConfig) -> MappedKeycloakUserResponse<'a> {
-        MappedKeycloakUserResponse {
-            response,
-            mapping,
-        }
+    fn new<'a>(
+        response: &'a KeycloakUserResponse,
+        mapping: &'a MappingConfig,
+    ) -> MappedKeycloakUserResponse<'a> {
+        MappedKeycloakUserResponse { response, mapping }
     }
 
     /// Get the user's home directory
@@ -109,7 +112,11 @@ fn get_user_count_api_url(config: &KeycloakConfig) -> String {
     format!("{}/admin/realms/{}/users/count", config.url, config.realm)
 }
 
-fn get_number_of_users(config: &KeycloakConfig, access_token: &str, client: &Client) -> Result<libc::uid_t> {
+fn get_number_of_users(
+    config: &KeycloakConfig,
+    access_token: &str,
+    client: &Client,
+) -> Result<libc::uid_t> {
     let response = client
         .get(get_user_count_api_url(config))
         .bearer_auth(access_token)
@@ -118,13 +125,13 @@ fn get_number_of_users(config: &KeycloakConfig, access_token: &str, client: &Cli
 }
 
 /// Template function to make a request to the Keycloak API to get users
-/// Specific request functionalities must be constructed via the 
+/// Specific request functionalities must be constructed via the
 /// query_args parameter.
 /// Returns a vector of KeycloakUser instances or an error if the request fails
 fn users_request(
-    config: &KeycloakConfig, 
+    config: &KeycloakConfig,
     attribute_mapping: &MappingConfig,
-    access_token: &str, 
+    access_token: &str,
     query_args: &[(&str, &str)],
     client: &Client,
 ) -> Result<Vec<KeycloakUser>> {
@@ -135,22 +142,20 @@ fn users_request(
         .send()?;
     let users: Vec<KeycloakUserResponse> = serde_json::from_str(&response.text()?)?;
 
-    Ok(
-        users
+    Ok(users
         .iter()
         .map(|user| MappedKeycloakUserResponse::new(&user, attribute_mapping))
         .map(|mapped_user| KeycloakUser::try_from(mapped_user))
         .filter_map(|res| res.ok())
-        .collect::<Vec<KeycloakUser>>()
-    )
+        .collect::<Vec<KeycloakUser>>())
 }
 
 /// List all users from Keycloak
 /// This function will make multiple requests to the Keycloak API to get all users
 /// Returns a vector of KeycloakUser instances or an error if the request fails
 pub fn list_users(
-    config: &KeycloakConfig, 
-    attribute_mapping: &MappingConfig, 
+    config: &KeycloakConfig,
+    attribute_mapping: &MappingConfig,
     access_token: &str,
 ) -> Result<Vec<KeycloakUser>> {
     let client = Client::new();
@@ -158,12 +163,12 @@ pub fn list_users(
     let mut users = Vec::with_capacity(nusers as usize);
     for first in (0..nusers).step_by(BATCH_SIZE) {
         users.append(&mut users_request(
-            config, 
+            config,
             attribute_mapping,
-            access_token, 
+            access_token,
             &[
                 ("briefRepresentation", "false"),
-                ("first", &format!("{}", first)), 
+                ("first", &format!("{}", first)),
                 ("max", &format!("{}", BATCH_SIZE)),
             ],
             &client,
@@ -175,29 +180,29 @@ pub fn list_users(
 /// Get a user by its username
 /// Returns a KeycloakUser instance if the user is found
 /// Returns None if the user is not found
-/// Returns an error if multiple users with that name are found or any 
+/// Returns an error if multiple users with that name are found or any
 /// other error occurs during the request
 pub fn get_user_by_name(
-    config: &KeycloakConfig, 
-    attribute_mapping: &MappingConfig, 
-    access_token: &str, 
+    config: &KeycloakConfig,
+    attribute_mapping: &MappingConfig,
+    access_token: &str,
     username: &str,
 ) -> Result<Option<KeycloakUser>> {
     let client = Client::new();
     let mut users = users_request(
-        config, 
+        config,
         attribute_mapping,
-        access_token, 
-        &[
-            ("username", username),
-            ("exact", "true"),
-            ],
+        access_token,
+        &[("username", username), ("exact", "true")],
         &client,
     )?;
     if users.len() <= 1 {
         Ok(users.pop())
     } else {
-        Err(anyhow!("Found more than one user with the name {}", username))
+        Err(anyhow!(
+            "Found more than one user with the name {}",
+            username
+        ))
     }
 }
 

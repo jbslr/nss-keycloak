@@ -1,5 +1,5 @@
-use std::cmp::Eq;
 use serde::Deserialize;
+use std::cmp::Eq;
 
 #[derive(Debug, Deserialize, PartialEq, Eq)]
 pub struct KeycloakConfig {
