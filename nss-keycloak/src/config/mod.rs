@@ -49,7 +49,7 @@ mod tests {
         });
     }
 
-    /// Test that the default configuration file path is used when the environment variable 
+    /// Test that the default configuration file path is used when the environment variable
     /// is not set
     #[test]
     fn test_get_config_path_from_default() {

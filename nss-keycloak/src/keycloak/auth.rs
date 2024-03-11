@@ -37,7 +37,7 @@ fn format_token(json_response: &str, request_time: &SystemTime) -> Result<Keyclo
         refresh_expires_in: u64,
     }
     let token_response = serde_json::from_str::<KeycloakTokenResponse>(json_response)?;
-    // calculate the expiration time of the access token and the refresh token, and 
+    // calculate the expiration time of the access token and the refresh token, and
     // subtract a time buffer to expiration issues near the expiration time
     let access_token_expiration = request_time
         .add(Duration::from_secs(token_response.expires_in))
@@ -58,7 +58,10 @@ fn get_token(config: &KeycloakConfig) -> Result<KeycloakToken> {
     let client = reqwest::blocking::Client::new();
     let request_time = SystemTime::now();
     let response = client
-        .post(&format!("{}/realms/{}/protocol/openid-connect/token", config.url, config.realm))
+        .post(&format!(
+            "{}/realms/{}/protocol/openid-connect/token",
+            config.url, config.realm
+        ))
         .form(&[
             ("grant_type", "password"),
             ("client_id", &config.client_id),
@@ -75,7 +78,10 @@ fn refresh_token(config: &KeycloakConfig, token: &KeycloakToken) -> Result<Keycl
     let client = reqwest::blocking::Client::new();
     let request_time = SystemTime::now();
     let response = client
-        .post(&format!("{}/realms/{}/protocol/openid-connect/token", config.url, config.realm))
+        .post(&format!(
+            "{}/realms/{}/protocol/openid-connect/token",
+            config.url, config.realm
+        ))
         .form(&[
             ("grant_type", "refresh_token"),
             ("client_id", &config.client_id),
@@ -110,7 +116,6 @@ pub trait TokenProvider {
 }
 
 impl TokenProvider for KeycloakAuth<'_> {
-
     /// Will check if the KeycloakAuth instance has a valid token
     /// if yes, return the access token of that token
     /// if no, try to get a new token using the refresh token if it is still valid
@@ -118,7 +123,7 @@ impl TokenProvider for KeycloakAuth<'_> {
     fn get_access_token(&mut self) -> Result<&String> {
         return {
             if self.token.is_some() && access_token_is_valid(self.token.as_ref().unwrap()) {
-            // token is valid, return access token
+                // token is valid, return access token
                 Ok(&self.token.as_ref().unwrap().access_token)
             } else if self.token.is_some() && refresh_token_is_valid(self.token.as_ref().unwrap()) {
                 // refresh token is valid, get a new access token, then return it
@@ -132,7 +137,7 @@ impl TokenProvider for KeycloakAuth<'_> {
                 self.token = Some(get_token(self.keycloak_config)?);
                 Ok(&self.token.as_ref().unwrap().access_token)
             }
-        }
+        };
     }
 
     fn has_valid_token(&self) -> bool {
@@ -144,7 +149,6 @@ impl TokenProvider for KeycloakAuth<'_> {
 }
 
 impl KeycloakAuth<'_> {
-
     /// create a new KeycloakAuth instance
     /// try to get a token from the Keycloak server using the direct access grant flow
     pub fn new(keycloak_config: &KeycloakConfig) -> Result<KeycloakAuth> {
@@ -158,7 +162,10 @@ impl KeycloakAuth<'_> {
     /// mainly for testing purposes
     pub fn access_token_expires_in(&self) -> Option<Duration> {
         match self.token {
-            Some(ref token) => token.access_token_expiration.duration_since(SystemTime::now()).ok(),
+            Some(ref token) => token
+                .access_token_expiration
+                .duration_since(SystemTime::now())
+                .ok(),
             None => None,
         }
     }
@@ -167,7 +174,10 @@ impl KeycloakAuth<'_> {
     /// mainly for testing purposes
     pub fn refresh_token_expires_in(&self) -> Option<Duration> {
         match self.token {
-            Some(ref token) => token.refresh_token_expiration.duration_since(SystemTime::now()).ok(),
+            Some(ref token) => token
+                .refresh_token_expiration
+                .duration_since(SystemTime::now())
+                .ok(),
             None => None,
         }
     }
