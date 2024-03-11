@@ -1,0 +1,14 @@
+---
+version: '3'
+services:
+  keycloak:
+    extends:
+      file: dev.docker-compose.yml
+      service: keycloak
+  example:
+    build:
+      context: nss-keycloak
+      dockerfile: Dockerfile
+    depends_on:
+      - keycloak
+  

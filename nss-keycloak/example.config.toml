@@ -1,0 +1,15 @@
+[keycloak]
+realm = "test"
+url = "http://keycloak:8080"
+client_id = "nss-client"
+client_secret = "UO2i2h5Vku3oQBvFIlsMG23pIMZyRJOi"
+username = "nss-user"
+password = "nss-user"
+
+[mapping]
+user_home = "homedirectory"
+user_shell = "loginshell"
+user_gecos = "gecos"
+user_uid = "uidnumber"
+user_gid = "gidnumber"
+group_gid = "gidnumber"
