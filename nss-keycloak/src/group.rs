@@ -2,7 +2,7 @@ use libnss::interop::Response;
 use libnss::group::{Group, GroupHooks};
 
 use crate::keycloak::auth::TokenProvider;
-use crate::keycloak::groups::{list_groups, get_group_by_name, KeycloakGroup};
+use crate::keycloak::groups::{get_group_by_gid, get_group_by_name, list_groups, KeycloakGroup};
 
 pub struct KeycloakNssGroup;
 
@@ -39,8 +39,25 @@ impl GroupHooks for KeycloakNssGroup {
         }
     }
 
+    /// Get a group by gid
+    /// calls keycloak::get_group_by_gid underneath
+    /// Returns Response::Success if group is found
+    /// Returns Response::NotFound if group is not found
+    /// Returns Response::Unavail if there was an error
     fn get_entry_by_gid(gid: libc::gid_t) -> Response<Group> {
-        todo!()
+        match get_group_by_gid(
+            &crate::CONFIG.keycloak, 
+            &crate::CONFIG.mapping, 
+            crate::AUTH.lock().unwrap().get_access_token().unwrap(),
+            gid,
+        ) {
+            Ok(None) => Response::NotFound,
+            Ok(Some(group)) => Response::Success(Group::from(group)),
+            Err(err) => {
+                log::error!("Failed to get group by gid: {:?}", err);
+                Response::Unavail
+            },
+        }
     }
 
     /// Get a group by name

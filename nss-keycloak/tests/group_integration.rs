@@ -64,3 +64,35 @@ fn test_get_entry_by_name_not_found() {
         };
     });
 }
+
+#[test]
+fn test_get_entry_by_gid() {
+    temp_env::with_var("NSSKEYCLOAK_CONFIG_FILE", Some("tests/files/config.toml"), || {
+        let response = nss_keycloak::KeycloakNssGroup::get_entry_by_gid(501);
+        match response {
+            Response::Success(group) => {
+                assert_eq!(group.name, "group02");
+                assert_eq!(group.gid, 501);
+                assert_eq!(group.members, vec!["user02", ]);
+            },
+            _ => panic!(
+                "Failed to get group by gid. Expected Respose::Success, got {}", 
+                response_type_as_str(&response),
+            ),
+        };
+    });
+}
+
+#[test]
+fn test_get_entry_by_gid_not_found() {
+    temp_env::with_var("NSSKEYCLOAK_CONFIG_FILE", Some("tests/files/config.toml"), || {
+        let response = nss_keycloak::KeycloakNssGroup::get_entry_by_gid(502);
+        match response {
+            Response::NotFound => (),
+            _ => panic!(
+                "Failed to get group by gid. Expected Respose::NotFound, got {}", 
+                response_type_as_str(&response),
+            ),
+        };
+    });
+}
