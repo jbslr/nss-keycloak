@@ -142,3 +142,34 @@ pub(crate) fn get_group_by_name(
         .next()
     )
 }
+
+pub(crate) fn get_group_by_gid(
+    config: &KeycloakConfig, 
+    attribute_mapping: &MappingConfig, 
+    access_token: &str,
+    gid: libc::gid_t,
+) -> Result<Option<KeycloakGroup>> {
+    let client = Client::new();
+    let gid_str = gid.to_string();
+    Ok(
+        groups_request(
+            config,
+            attribute_mapping,
+            access_token,
+            &[
+                ("briefRepresentation", "false"),
+            ],
+            &client,
+        )?
+        .into_iter()
+        .filter(|group| {
+           match get_single_attribute(&group.attributes, &attribute_mapping.group_gid) {
+                Ok(Some(gid)) => *gid == gid_str,
+                _ => false,
+           }
+        })
+        .map(|group| add_group_members(config, &client, access_token, attribute_mapping, group))
+        .filter_map(|g| g.ok())
+        .next()
+    )
+}
