@@ -121,23 +121,24 @@ impl TokenProvider for KeycloakAuth<'_> {
     /// if no, try to get a new token using the refresh token if it is still valid
     /// or get a new token using the direct access grant flow
     fn get_access_token(&mut self) -> Result<&String> {
-        return {
-            if self.token.is_some() && access_token_is_valid(self.token.as_ref().unwrap()) {
-                // token is valid, return access token
-                Ok(&self.token.as_ref().unwrap().access_token)
-            } else if self.token.is_some() && refresh_token_is_valid(self.token.as_ref().unwrap()) {
-                // refresh token is valid, get a new access token, then return it
-                self.token = Some(refresh_token(
-                    self.keycloak_config,
-                    self.token.as_ref().unwrap(),
-                )?);
-                Ok(&self.token.as_ref().unwrap().access_token)
-            } else {
-                // no token or no valid token, get a new token using the direct access grant flow
-                self.token = Some(get_token(self.keycloak_config)?);
-                Ok(&self.token.as_ref().unwrap().access_token)
-            }
-        };
+        // update token if necessary
+        if self.token.is_some() && access_token_is_valid(self.token.as_ref().unwrap()) {
+            // token is valid, no action required
+        } else if self.token.is_some() && refresh_token_is_valid(self.token.as_ref().unwrap()) {
+            // refresh token is valid, get a new access token
+            self.token = Some(refresh_token(
+                self.keycloak_config,
+                self.token.as_ref().unwrap(),
+            )?);
+        } else {
+            // no token or no valid token, get a new token using the direct access grant flow
+            self.token = Some(get_token(self.keycloak_config)?);
+        }
+        // return the access token
+        match &self.token {
+            Some(token) => Ok(&token.access_token),
+            None => Err(anyhow::anyhow!("No token available")),
+        }
     }
 
     fn has_valid_token(&self) -> bool {
