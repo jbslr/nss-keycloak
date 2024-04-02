@@ -36,6 +36,7 @@
     "requiredActions" : [ ],
     "realmRoles" : [ "default-roles-test" ],
     "clientRoles" : {
+      "realm-management" : [ "query-users", "query-groups", "view-users" ],
       "nss-client" : [ "uma_protection" ]
     },
     "notBefore" : 0,

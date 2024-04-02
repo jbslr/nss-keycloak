@@ -3,8 +3,11 @@ realm = "test"
 url = "http://keycloak:8080"
 client_id = "nss-client"
 client_secret = "UO2i2h5Vku3oQBvFIlsMG23pIMZyRJOi"
-username = "nss-user"
-password = "nss-user"
+# username and password are optional
+# use client credentials grant type if not provided
+# username = "nss-user"
+# password = "nss-user" 
+
 
 [mapping]
 user_home = "homedirectory"
