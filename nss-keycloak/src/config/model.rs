@@ -7,8 +7,10 @@ pub struct KeycloakConfig {
     pub client_id: String,
     pub client_secret: String,
     pub url: String,
-    pub username: String,
-    pub password: String,
+    // optional parameters. If provided, will request password grant type
+    // else, request client credentials grant type
+    pub username: Option<String>,
+    pub password: Option<String>,
 }
 
 #[derive(Debug, Deserialize, PartialEq, Eq)]

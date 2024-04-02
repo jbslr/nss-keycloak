@@ -33,7 +33,7 @@ fn format_token(json_response: &str, request_time: &SystemTime) -> Result<Keyclo
     struct KeycloakTokenResponse {
         access_token: String,
         expires_in: u64,
-        refresh_token: String,
+        refresh_token: Option<String>, // refresh token can be missing if it has 0 lifetime
         refresh_expires_in: u64,
     }
     let token_response = serde_json::from_str::<KeycloakTokenResponse>(json_response)?;
@@ -48,7 +48,7 @@ fn format_token(json_response: &str, request_time: &SystemTime) -> Result<Keyclo
     Ok(KeycloakToken {
         access_token: token_response.access_token,
         access_token_expiration,
-        refresh_token: token_response.refresh_token,
+        refresh_token: token_response.refresh_token.unwrap_or(String::from("")),
         refresh_token_expiration,
     })
 }
@@ -56,20 +56,34 @@ fn format_token(json_response: &str, request_time: &SystemTime) -> Result<Keyclo
 /// fetch a new access token from Keycloak using the given config
 fn get_token(config: &KeycloakConfig) -> Result<KeycloakToken> {
     let client = reqwest::blocking::Client::new();
+    // build request parameters based on whether username and password are provided
+    // if they are provided, use the password grant type
+    // else, use the client credentials grant type (this assumes a qualified service account for this client)
+    let form_params = match (&config.username, &config.password) {
+        (Some(username), Some(password)) => vec![
+            ("grant_type", "password"),
+            ("client_id", &config.client_id),
+            ("client_secret", &config.client_secret),
+            ("username", &username),
+            ("password", &password),
+        ],
+        _ => vec![
+            ("grant_type", "client_credentials"),
+            ("client_id", &config.client_id),
+            ("client_secret", &config.client_secret),
+        ],
+    };
+    // save request time to calculate token expiration
     let request_time = SystemTime::now();
+    // send request to Keycloak token endpoint
     let response = client
         .post(&format!(
             "{}/realms/{}/protocol/openid-connect/token",
             config.url, config.realm
         ))
-        .form(&[
-            ("grant_type", "password"),
-            ("client_id", &config.client_id),
-            ("client_secret", &config.client_secret),
-            ("username", &config.username),
-            ("password", &config.password),
-        ])
+        .form(&form_params)
         .send()?;
+    // then parse the response and format it into a KeycloakToken
     format_token(&response.text()?, &request_time)
 }
 
